@@ -3,6 +3,9 @@ from typing import List, Optional
 import pandas as pd
 
 
+__all__ = ["vd_reader", "vd_multi_reader"]
+
+
 def vd_reader(path: str, *args, **kwargs) -> pd.DataFrame:
     """
     Single VD file reader. This reads files and returns a pandas dataframe.
@@ -61,7 +64,7 @@ def vd_multi_read(paths: List[str], *kwargs) -> pd.DataFrame:
     Args:
         paths: List = List of absolute path to the vd files.
         name: Optional[List[str]] = lits of name of columns in each vd file.
-        dtypes: Optional[dict[str]] = dict of
+        dtypes: Optional[dict[str]] = dict of column name and their data types
     """
     dfs = []
     for path in paths:
