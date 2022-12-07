@@ -1,9 +1,45 @@
+import os
+import pandas as pd
 from typing import List
+from src.utils import get_pylogger
 
-__all__ = ["Filter", "Filter_com", "Filter_g"]
+logger = get_pylogger()
+
+__all__ = ["filter_any", "filter", "filter_com", "filter_g"]
 
 
-def Filter(
+def filter_any(df, **kwargs) -> pd.DataFrame:
+    """
+    Filter the dataframe with keywords as arguments.
+    This function can filter the dataframe with arguments and value as list.
+
+    Example:
+    filter_any(df, name=["residence","industrial"], region=["bw", "nrw"])
+    """
+    for arg in kwargs:
+        if type(kwargs[arg]) != type([]):
+            kwargs[arg] = [kwargs[arg]]
+        df = df[df[arg].isin(kwargs[arg])]
+    return df
+
+
+def filter_from_csv(data: pd.DataFrame, path: str) -> pd.DataFrame:
+    """
+    Apply filter directly from the csv/xls file.
+    """
+    # Read either the csv or xlsx file and then apply the filters from the file itself.
+    if os.path.splitext(path)[-1] == ".csv":
+        df = pd.read_csv(path)
+    elif os.path.splitext(path)[-1] == ".xlsx":
+        df = pd.read_excel(path)
+    else:
+        print(f"Please check your {os.path.splitext(path)[-1]} path again!")
+    kw = {k: [str(i) for i in v.values()] for k, v in df.to_dict().items()}
+    df = filter_any(data, **kw)
+    return df
+
+
+def filter(
     df,
     attlist: List = None,
     comlist: List = None,
@@ -13,7 +49,7 @@ def Filter(
     cat3list: List = None,
     cat4list: List = None,
     sectorlist: List = None,
-):
+) -> pd.DataFrame:
     """
     Function to apply filters over the dataframe.
     """
@@ -41,7 +77,7 @@ def Filter(
     return df_filter
 
 
-def Filter_com(
+def filter_com(
     df,
     attlist: List = None,
     comlist: List = None,
@@ -73,7 +109,7 @@ def Filter_com(
     return df_filter
 
 
-def Filter_g(
+def filter_g(
     df,
     attlist: List = None,
     comlist: List = None,
