@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 from typing import List
-from src.utils import get_pylogger
+
+from src.utils.pylogger import get_pylogger
 
 logger = get_pylogger()
 

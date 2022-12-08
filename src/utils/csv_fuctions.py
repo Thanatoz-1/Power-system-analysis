@@ -1,8 +1,10 @@
 import os
 from typing import List, Optional
 import pandas as pd
+from src.utils.pylogger import get_pylogger
 
 
+logger = get_pylogger(__name__)
 __all__ = ["vd_reader", "vd_multi_read"]
 
 
@@ -19,6 +21,7 @@ def vd_reader(path: str, *args, **kwargs) -> pd.DataFrame:
                 This defaults to default datatype in the sample vd file.
     """
     if os.path.exists(path):
+        logger.info(f"Reading file {path} with kwargs: {kwargs}")
         name = (
             kwargs["name"]
             if "name" in kwargs
@@ -40,7 +43,7 @@ def vd_reader(path: str, *args, **kwargs) -> pd.DataFrame:
             else {
                 "Attribute": "category",
                 "Commodity": "category",
-                "Process": str,
+                "Process": "category",
                 "Period": "category",
                 "Region": "category",
                 "Vintage": "category",
@@ -50,10 +53,12 @@ def vd_reader(path: str, *args, **kwargs) -> pd.DataFrame:
             }
         )
         df = pd.read_csv(path, skiprows=(13), names=name, dtype=dtype, index_col=None)
+        logger.debug(f"Shape of df is {df.shape}.")
         if "Szenario" in kwargs:
             df["Szenario"] = kwargs["Szenario"]
     else:
-        raise "Path incorrect. Please check your path and use absolute path"
+        raise f"Path incorrect. Please check your path and use absolute path. {path}"
+
     if "masterlist_path" in kwargs:
         print(f"Found masterlist at {kwargs['masterlist_path']}")
         df_master_process = pd.read_excel(kwargs["masterlist_path"], sheet_name="Processes", usecols="B:K")
@@ -78,10 +83,12 @@ def vd_reader(path: str, *args, **kwargs) -> pd.DataFrame:
             df_master_commodity["Com_Type3"].astype("category")
             df_master_commodity["Com_Unit"].astype("category")
             df = df.merge(df_master_commodity, on="Commodity", how="outer")
-        except:
-            print(f"Error parsing masterlist commodity.")
+        except Exception as e:
+            logger.error(f"Error parsing masterlist commodity. Exception raised {e}")
     else:
-        print(f"No masterlist is provided. Please pass Masterlist path in variable 'masterlist_path'. Else continue")
+        logger.warning(
+            f"No masterlist is provided. Please pass Masterlist path in variable 'masterlist_path'. Else continue"
+        )
     return df
 
 
@@ -96,5 +103,6 @@ def vd_multi_read(paths: List[str], *kwargs) -> pd.DataFrame:
     """
     dfs = []
     for path in paths:
+        logger.info(f"Reading multivd file.")
         dfs.append(vd_reader(path, **kwargs))
     return pd.concat(dfs)
