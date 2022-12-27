@@ -30,3 +30,10 @@ FinalEnergy_Residential_WaterHeating_Coal = single_var(
                             )
             )
 ```
+
+TODO:
+1. Include better logging
+2. Create better method for single_var
+3. Create method for unit change that are user-defined inputs rather than existing hardcoded approaches.
+4. Create documentations for the project as well. 
+5. Generate the output based on the code.
